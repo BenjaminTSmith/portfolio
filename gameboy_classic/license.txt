@@ -1,0 +1,11 @@
+Model Information:
+* title:	Gameboy Classic
+* source:	https://sketchfab.com/3d-models/gameboy-classic-854c46e14ce24779ad64ae74cb9b9089
+* author:	Bram Verheyen (https://sketchfab.com/BramVerheyen)
+
+Model License:
+* license type:	CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)
+* requirements:	Author must be credited. No commercial use.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Gameboy Classic" (https://sketchfab.com/3d-models/gameboy-classic-854c46e14ce24779ad64ae74cb9b9089) by Bram Verheyen (https://sketchfab.com/BramVerheyen) licensed under CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)
