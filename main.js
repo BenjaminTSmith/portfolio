@@ -24,7 +24,7 @@ scene.add(directionalLight);
 const loader = new GLTFLoader();
 let gameboy = null;
 loader.load(
-    'gameboy_classic/scene.gltf', // Replace with the path to your GLTF file
+    '/gameboy_classic/scene.gltf', // Replace with the path to your GLTF file
     (gltf) => {
         console.log('here');
         gameboy = gltf.scene;
@@ -43,7 +43,7 @@ loader.load(
 
 let cartridge = null;
 loader.load(
-    'gameboy_cartridge/scene.gltf', // Replace with the path to your GLTF file
+    '/gameboy_cartridge/scene.gltf', // Replace with the path to your GLTF file
     (gltf) => {
         console.log('here');
         cartridge = gltf.scene;
