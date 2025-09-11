@@ -117,6 +117,7 @@ const State = {
 
 let gameboyTimer = 0;
 let cartridgeTimer = 0;
+
 function animate() {
     requestAnimationFrame(animate);
     getClosestIntersection(camera, scene);
