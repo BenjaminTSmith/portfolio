@@ -2,6 +2,8 @@ import './style.css';
 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 
 function easeInOutQuart(x) {
     return x < 0.5 ? 8 * x * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2;
@@ -122,6 +124,11 @@ function animate() {
     requestAnimationFrame(animate);
     getClosestIntersection(camera, scene);
     renderer.clear();
+
+    if (gameboy !== null && cartridge !== null) {
+        const element = document.getElementById("loading");
+        element.style.display = "none";
+    }
 
     const dt = clock.getDelta();
 

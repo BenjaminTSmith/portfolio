@@ -1,5 +1,29 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* no scrollbars */
+  height: 100%;
+  width: 100%;
+}
+
 canvas {
     position: absolute;
     top: 0;
     left: 0;
+}
+
+#loading {
+    position: absolute;
+    font-family: "Domine", serif;
+    font-optical-sizing: auto;
+    font-weight: 10;
+    font-size: 120px;
+    font-style: normal;
+    width: 100%;
+    text-align: center;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    display: block;
+    color: #ffffff;
 }
