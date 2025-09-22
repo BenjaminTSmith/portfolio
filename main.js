@@ -53,12 +53,11 @@ loader.load(
         gameboy = gltf.scene;
 
         gameboy.scale.set(150, 150, 150); // Scale the model to make it bigger
-        // gameboy.position.set(0, 0, 0); // Center the model
         // gameboy.rotation.set(0.58, -0.22, 0.384);
         const box = new THREE.Box3().setFromObject(gameboy);
         const center = box.getCenter(new THREE.Vector3());
         gameboy.position.sub(center);
-        // gameboy.position.y = -15;
+        gameboy.position.set(0, 0, 0); // Center the model
 
         scene.add(gameboy);
     },
@@ -83,7 +82,6 @@ const clock = new THREE.Clock(true);
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let closestObject = null;
-
 
 function getClosestIntersection(camera, scene) {
     raycaster.setFromCamera(mouse, camera);
@@ -125,8 +123,7 @@ document.addEventListener("visibilitychange", function() {
     }
 });
 
-
-
+let gameboyAnimationTimer = 0
 function animate() {
     requestAnimationFrame(animate);
     getClosestIntersection(camera, scene);
@@ -142,16 +139,26 @@ function animate() {
     const dt = clock.getDelta();
 
     if (isChildOf(closestObject, gameboy)) {
-        gameboyTimer += dt;
+        gameboyTimer += dt / 0.7;
         if (gameboyTimer > 1) gameboyTimer = 1;
     } else {
-        gameboyTimer -= dt;
+        gameboyTimer -= dt / 0.7;
         if (gameboyTimer < 0) gameboyTimer = 0;
     }
+
     const gameboyT = easeInOutQuart(gameboyTimer);
-    const gameboyZ = (1 - gameboyT) * 0 + gameboyT * 4;
+    const gameboyZ = (1 - gameboyT) * 0 + gameboyT * 3.2;
     gameboy.position.z = gameboyZ;
     
+    const timeToRotateGameboy = 6;
+    gameboy.rotateY(dt / timeToRotateGameboy * 2 * Math.PI);
+
+    const gameboyAnimationPeriod = 5;
+    const f = 1 / gameboyAnimationPeriod;
+    gameboyAnimationTimer += dt;
+    gameboy.position.set(gameboy.position.x,
+        1.5*Math.sin(f*2*Math.PI*gameboyAnimationTimer),
+        gameboy.position.z);
 
     /*if (isChildOf(closestObject, cartridge)) {
         cartridgeTimer += dt;
