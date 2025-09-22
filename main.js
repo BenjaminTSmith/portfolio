@@ -2,11 +2,32 @@ import './style.css';
 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 
 function easeInOutQuart(x) {
     return x < 0.5 ? 8 * x * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2;
+}
+
+function lerp(a, b, t) {
+    return (1 - t) * a + t * b;
+}
+
+// points is a 6 element 2d array
+function getPointOnBezierCurve(points, t) {
+    const x1 = points[0];
+    const y1 = points[1];
+    const x2 = points[2];
+    const y2 = points[3];
+    const x3 = points[4];
+    const y3 = points[5];
+
+    const xa = lerp(x1, x2, t);
+    const ya = lerp(y1, y2, t);
+    const xb = lerp(x2, x3, t);
+    const yb = lerp(y2, y3, t);
+
+    const x = lerp(xa, xb, t);
+    const y = lerp(ya, yb, t);
+    return [x, y];
 }
 
 const scene = new THREE.Scene();
@@ -26,13 +47,19 @@ scene.add(directionalLight);
 const loader = new GLTFLoader();
 let gameboy = null;
 loader.load(
-    '/gameboy_classic/scene.gltf', // Replace with the path to your GLTF file
+    '/gameboy_1989/scene.gltf', // Replace with the path to your GLTF file
     (gltf) => {
         console.log('here');
         gameboy = gltf.scene;
-        gameboy.scale.set(4, 4, 4); // Scale the model to make it bigger
-        gameboy.position.set(3, -8, 0); // Center the model
-        gameboy.rotation.set(0.6, -0.20, 0.4);
+
+        gameboy.scale.set(150, 150, 150); // Scale the model to make it bigger
+        // gameboy.position.set(0, 0, 0); // Center the model
+        // gameboy.rotation.set(0.58, -0.22, 0.384);
+        const box = new THREE.Box3().setFromObject(gameboy);
+        const center = box.getCenter(new THREE.Vector3());
+        gameboy.position.sub(center);
+        // gameboy.position.y = -15;
+
         scene.add(gameboy);
     },
     (xhr) => {
@@ -43,24 +70,6 @@ loader.load(
     }
 );
 
-let cartridge = null;
-loader.load(
-    '/gameboy_cartridge/scene.gltf', // Replace with the path to your GLTF file
-    (gltf) => {
-        console.log('here');
-        cartridge = gltf.scene;
-        cartridge.scale.set(4, 4, 4); // Scale the model to make it bigger
-        cartridge.position.set(-40, 20, -10); // Center the model
-        cartridge.rotation.set(Math.PI / 2, -Math.PI / 2, 0);
-        scene.add(cartridge);
-    },
-    (xhr) => {
-        console.log(`Model ${(xhr.loaded / xhr.total) * 100}% loaded`);
-    },
-    (error) => {
-        console.error('An error occurred while loading the GLTF model:', error);
-    }
-);
 
 let x = 0;
 let y = 0;
@@ -75,22 +84,6 @@ const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let closestObject = null;
 
-window.addEventListener('mousemove', (event) => {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-});
-
-window.addEventListener('click', (event) => {
-    console.log("chat am i goated?");
-});
-
-document.addEventListener("visibilitychange", function() {
-    if (document.hidden) {
-
-    } else {
-
-    }
-});
 
 function getClosestIntersection(camera, scene) {
     raycaster.setFromCamera(mouse, camera);
@@ -113,19 +106,35 @@ function isChildOf(child, parent) {
     return false;
 }
 
-const State = {
-    selection: "selection",
-};
-
 let gameboyTimer = 0;
-let cartridgeTimer = 0;
+
+window.addEventListener('mousemove', (event) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+});
+
+window.addEventListener('click', (event) => {
+
+});
+
+document.addEventListener("visibilitychange", function() {
+    if (document.hidden) {
+
+    } else {
+
+    }
+});
+
+
 
 function animate() {
     requestAnimationFrame(animate);
     getClosestIntersection(camera, scene);
+
+
     renderer.clear();
 
-    if (gameboy !== null && cartridge !== null) {
+    if (gameboy !== null) {
         const element = document.getElementById("loading");
         element.style.display = "none";
     }
@@ -142,8 +151,9 @@ function animate() {
     const gameboyT = easeInOutQuart(gameboyTimer);
     const gameboyZ = (1 - gameboyT) * 0 + gameboyT * 4;
     gameboy.position.z = gameboyZ;
+    
 
-    if (isChildOf(closestObject, cartridge)) {
+    /*if (isChildOf(closestObject, cartridge)) {
         cartridgeTimer += dt;
         if (cartridgeTimer > 1) cartridgeTimer = 1;
     } else {
@@ -152,7 +162,7 @@ function animate() {
     }
     const cartridgeT = easeInOutQuart(cartridgeTimer);
     const cartridgeZ = (1 - cartridgeT) * -10 + cartridgeT * -7;
-    cartridge.position.z = cartridgeZ;
+    cartridge.position.z = cartridgeZ;*/
 
     renderer.render(scene, camera);
 }
