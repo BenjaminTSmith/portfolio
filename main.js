@@ -40,9 +40,12 @@ renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 camera.position.setZ(30);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 5);
+/*const directionalLight = new THREE.DirectionalLight(0xffffff, 5);
 directionalLight.position.set(5, 5, 5);
-scene.add(directionalLight);
+scene.add(directionalLight);*/
+
+const light = new THREE.AmbientLight(0x404040, 50);
+scene.add( light );
 
 const loader = new GLTFLoader();
 let gameboy = null;
@@ -53,11 +56,13 @@ loader.load(
         gameboy = gltf.scene;
 
         gameboy.scale.set(150, 150, 150); // Scale the model to make it bigger
-        // gameboy.rotation.set(0.58, -0.22, 0.384);
         const box = new THREE.Box3().setFromObject(gameboy);
         const center = box.getCenter(new THREE.Vector3());
         gameboy.position.sub(center);
         gameboy.position.set(0, 0, 0); // Center the model
+        gameboy.rotation.set(0, 0, 0);
+
+        gameboy.userData.forwardQuat = gameboy.quaternion.clone();
 
         scene.add(gameboy);
     },
@@ -111,10 +116,6 @@ window.addEventListener('mousemove', (event) => {
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 });
 
-window.addEventListener('click', (event) => {
-
-});
-
 document.addEventListener("visibilitychange", function() {
     if (document.hidden) {
 
@@ -123,11 +124,37 @@ document.addEventListener("visibilitychange", function() {
     }
 });
 
-let gameboyAnimationTimer = 0
-function animate() {
-    requestAnimationFrame(animate);
-    getClosestIntersection(camera, scene);
+const GameboyState = {
+    spinning: "spinning",
+    centering: "centering",
+    zooming: "zooming",
+    zoomed: "zoomed",
+};
 
+// gameboy state stuff for animation
+let gameboyState = GameboyState.spinning;
+let gameboyPositionInital = null;
+let gameboyPositionFinal = new THREE.Vector3(0, -5, 26);
+let gameboySpinRotationInitial = 0;
+window.addEventListener('click', (event) => {
+    getClosestIntersection(camera, scene);
+    if (isChildOf(closestObject, gameboy) && gameboyState == GameboyState.spinning) {
+        gameboyState = GameboyState.centering;   
+
+        gameboySpinRotationInitial = gameboy.quaternion.clone();
+    }
+});
+
+let running = true;
+
+const gameboyAnimationPeriod = 3;
+const f = 1 / gameboyAnimationPeriod;
+let gameboyAnimationTimer = 0
+let gameboySpinTimer = 0;
+let closestEndOfPeriod = 0;
+function animate() {
+    if (!running) return;
+    requestAnimationFrame(animate);
 
     renderer.clear();
 
@@ -136,40 +163,81 @@ function animate() {
         element.style.display = "none";
     }
 
+    getClosestIntersection(camera, scene);
     const dt = clock.getDelta();
+    if (gameboyState == GameboyState.spinning) {
 
-    if (isChildOf(closestObject, gameboy)) {
-        gameboyTimer += dt / 0.7;
-        if (gameboyTimer > 1) gameboyTimer = 1;
-    } else {
-        gameboyTimer -= dt / 0.7;
-        if (gameboyTimer < 0) gameboyTimer = 0;
+        if (isChildOf(closestObject, gameboy)) {
+            gameboyTimer += dt / 0.7;
+            if (gameboyTimer > 1) gameboyTimer = 1;
+        } else {
+            gameboyTimer -= dt / 0.7;
+            if (gameboyTimer < 0) gameboyTimer = 0;
+        }
+
+        const gameboyT = easeInOutQuart(gameboyTimer);
+        const gameboyZ = (1 - gameboyT) * 0 + gameboyT * 3.2;
+        gameboy.position.z = gameboyZ;
+
+        const timeToRotateGameboy = 6;
+        gameboy.rotateY(dt / timeToRotateGameboy * 2 * Math.PI);
+        console.log(gameboy.rotation.y);
+
+        gameboyAnimationTimer += dt;
+        if (gameboyAnimationTimer > gameboyAnimationPeriod) gameboyAnimationTimer = 0;
+        gameboy.position.set(gameboy.position.x,
+            1.5*Math.sin(f*2*Math.PI*gameboyAnimationTimer),
+            gameboy.position.z);
+        if (gameboyAnimationPeriod / 2 - gameboyAnimationTimer > 0) {
+            closestEndOfPeriod = gameboyAnimationPeriod / 2;
+        } else {
+            closestEndOfPeriod = gameboyAnimationPeriod;
+        }
+    } else if (gameboyState == GameboyState.centering) {
+
+        if (isChildOf(closestObject, gameboy)) {
+            gameboyTimer += dt / 0.7;
+            if (gameboyTimer > 1) gameboyTimer = 1;
+        } else {
+            // gameboyTimer -= dt / 0.7;
+            if (gameboyTimer < 0) gameboyTimer = 0;
+        }
+
+        const gameboyT = easeInOutQuart(gameboyTimer);
+        const gameboyZ = (1 - gameboyT) * 0 + gameboyT * 3.2;
+        gameboy.position.z = gameboyZ;
+
+        gameboySpinTimer += dt;
+        if (gameboySpinTimer > 1) gameboySpinTimer = 1;
+        //ameboy.rotation.y = lerp(gameboySpinRotationInitial, 0, easeInOutQuart(gameboySpinTimer));
+        console.log(gameboy.rotation.y);
+        // onsole.log(gameboySpinTimer);*/
+        gameboy.quaternion.slerpQuaternions(gameboySpinRotationInitial, gameboy.userData.forwardQuat, easeInOutQuart(gameboySpinTimer));
+
+        gameboyAnimationTimer += dt;
+        if (gameboyAnimationTimer > closestEndOfPeriod) gameboyAnimationTimer = closestEndOfPeriod;
+        gameboy.position.set(gameboy.position.x,
+            1.5*Math.sin(f*2*Math.PI*gameboyAnimationTimer),
+            gameboy.position.z);
+
+        if (gameboySpinTimer == 1 && gameboyAnimationTimer == closestEndOfPeriod) {
+            gameboyState = GameboyState.zooming;
+            gameboyPositionInital = gameboy.position.clone();
+            gameboyAnimationTimer = 0;
+        }
+    } else if (gameboyState == GameboyState.zooming) {
+        gameboyAnimationTimer += dt;
+        if (gameboyAnimationTimer > 1) {
+            gameboyState = GameboyState.zoomed;
+        }
+        gameboy.position.x = lerp(gameboyPositionInital.x, gameboyPositionFinal.x, easeInOutQuart(gameboyAnimationTimer));
+        gameboy.position.y = lerp(gameboyPositionInital.y, gameboyPositionFinal.y, easeInOutQuart(gameboyAnimationTimer));
+        gameboy.position.z = lerp(gameboyPositionInital.z, gameboyPositionFinal.z, easeInOutQuart(gameboyAnimationTimer));
+    } else if (gameboyState == GameboyState.zoomed) {
+        running = false;
+        renderer.domElement.style.display = 'none';
+        document.body.style.backgroundColor = '#81975b';
     }
-
-    const gameboyT = easeInOutQuart(gameboyTimer);
-    const gameboyZ = (1 - gameboyT) * 0 + gameboyT * 3.2;
-    gameboy.position.z = gameboyZ;
-    
-    const timeToRotateGameboy = 6;
-    gameboy.rotateY(dt / timeToRotateGameboy * 2 * Math.PI);
-
-    const gameboyAnimationPeriod = 5;
-    const f = 1 / gameboyAnimationPeriod;
-    gameboyAnimationTimer += dt;
-    gameboy.position.set(gameboy.position.x,
-        1.5*Math.sin(f*2*Math.PI*gameboyAnimationTimer),
-        gameboy.position.z);
-
-    /*if (isChildOf(closestObject, cartridge)) {
-        cartridgeTimer += dt;
-        if (cartridgeTimer > 1) cartridgeTimer = 1;
-    } else {
-        cartridgeTimer -= dt;
-        if (cartridgeTimer < 0) cartridgeTimer = 0;
-    }
-    const cartridgeT = easeInOutQuart(cartridgeTimer);
-    const cartridgeZ = (1 - cartridgeT) * -10 + cartridgeT * -7;
-    cartridge.position.z = cartridgeZ;*/
 
     renderer.render(scene, camera);
 }
