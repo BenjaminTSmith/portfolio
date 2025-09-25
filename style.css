@@ -45,8 +45,26 @@ canvas {
     text-align: center;
     line-height: 100px;
     font-weight: bold;
-    color: #2a301c;
+    color: #56643a;
     border-radius: 8px;
     opacity: 1;
     transition: top 3s linear;
+}
+
+#projects {
+    list-style-type: none;
+    font-family: 'GameBoy', sans-serif;
+    color: #56643a;
+    display: none;
+    font-size: 35px;
+    padding-left: 10px;
+    margin-top: 6px;
+}
+
+a:link,
+a:visited,
+a:hover,
+a:active {
+  text-decoration: none;
+  color: inherit;
 }

@@ -152,7 +152,38 @@ const f = 1 / gameboyAnimationPeriod;
 let gameboyAnimationTimer = 0
 let gameboySpinTimer = 0;
 let closestEndOfPeriod = 0;
-let nintendoLogoTimer = 0;
+
+
+let logoAnimationComplete = false;
+function animateLogo() {
+    if (logoAnimationComplete) return;
+    logoAnimationComplete = true;
+
+    const logo = document.getElementById("nintendo");
+    const sound = document.getElementById("sound");
+    const projects = document.getElementById("projects");
+
+    setTimeout(() => {
+        logo.style.top = "50%";   // move into center vertically
+        logo.style.transform = "translate(-50%, -50%)"; // keep centered
+    }, 500);
+
+    // After it’s in the middle, disappear
+    setTimeout(() => {
+        logo.style.display = "none";  // fade out
+    }, 4500);
+
+    // Optional: remove it from the DOM after fading
+    setTimeout(() => {
+        logo.remove();
+        projects.style.display = "block";
+    }, 5000);
+
+    setTimeout(() => {
+        sound.play();
+    }, 1500);
+}
+
 function animate() {
     if (!running) return;
     requestAnimationFrame(animate);
@@ -237,23 +268,7 @@ function animate() {
         gameboy.position.y = lerp(gameboyPositionInital.y, gameboyPositionFinal.y, easeInOutQuart(gameboyAnimationTimer));
         gameboy.position.z = lerp(gameboyPositionInital.z, gameboyPositionFinal.z, easeInOutQuart(gameboyAnimationTimer));
     } else if (gameboyState == GameboyState.zoomed) {
-        nintendoLogoTimer += dt / 5;
-        if (nintendoLogoTimer > 1) nintendoLogoTimer = 1;
-        const logo = document.getElementById("nintendo");
-        setTimeout(() => {
-            logo.style.top = "50%";   // move into center vertically
-            logo.style.transform = "translate(-50%, -50%)"; // keep centered
-        }, 500);
-
-        // After it’s in the middle, disappear
-        setTimeout(() => {
-            logo.style.display = "none";  // fade out
-        }, 4500);
-
-        // Optional: remove it from the DOM after fading
-        setTimeout(() => {
-            logo.remove();
-        }, 5000);
+        animateLogo();
     }
 
     renderer.render(scene, camera);
