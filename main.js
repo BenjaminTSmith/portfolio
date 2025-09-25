@@ -11,25 +11,6 @@ function lerp(a, b, t) {
     return (1 - t) * a + t * b;
 }
 
-// points is a 6 element 2d array
-function getPointOnBezierCurve(points, t) {
-    const x1 = points[0];
-    const y1 = points[1];
-    const x2 = points[2];
-    const y2 = points[3];
-    const x3 = points[4];
-    const y3 = points[5];
-
-    const xa = lerp(x1, x2, t);
-    const ya = lerp(y1, y2, t);
-    const xb = lerp(x2, x3, t);
-    const yb = lerp(y2, y3, t);
-
-    const x = lerp(xa, xb, t);
-    const y = lerp(ya, yb, t);
-    return [x, y];
-}
-
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -40,17 +21,13 @@ renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 camera.position.setZ(30);
 
-/*const directionalLight = new THREE.DirectionalLight(0xffffff, 5);
-directionalLight.position.set(5, 5, 5);
-scene.add(directionalLight);*/
-
 const light = new THREE.AmbientLight(0x404040, 50);
 scene.add( light );
 
 const loader = new GLTFLoader();
 let gameboy = null;
 loader.load(
-    '/gameboy_1989/scene.gltf', // Replace with the path to your GLTF file
+    '/smaller.glb', // Replace with the path to your GLTF file
     (gltf) => {
         console.log('here');
         gameboy = gltf.scene;
@@ -136,7 +113,7 @@ let gameboyState = GameboyState.spinning;
 let gameboyPositionInital = null;
 let gameboyPositionFinal = new THREE.Vector3(0, -5, 26);
 let gameboySpinRotationInitial = 0;
-window.addEventListener('click', (event) => {
+window.addEventListener('click', () => {
     getClosestIntersection(camera, scene);
     if (isChildOf(closestObject, gameboy) && gameboyState == GameboyState.spinning) {
         gameboyState = GameboyState.centering;   
@@ -171,17 +148,17 @@ function animateLogo() {
     // After it’s in the middle, disappear
     setTimeout(() => {
         logo.style.display = "none";  // fade out
-    }, 4500);
+    }, 5000);
 
     // Optional: remove it from the DOM after fading
     setTimeout(() => {
         logo.remove();
         projects.style.display = "block";
-    }, 5000);
+    }, 5500);
 
     setTimeout(() => {
         sound.play();
-    }, 1500);
+    }, 2875);
 }
 
 function animate() {
