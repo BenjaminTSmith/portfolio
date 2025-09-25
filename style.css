@@ -1,3 +1,8 @@
+@font-face {
+    font-family: 'GameBoy'; /* Choose a name for your font */
+    src: url('/fonts/GameBoy.ttf') format('truetype'); /* Specify the path to your TTF file */
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -26,4 +31,22 @@ canvas {
     z-index: 100;
     display: block;
     color: #ffffff;
+}
+
+#nintendo {
+    font-family: 'GameBoy', sans-serif;
+    position: absolute;
+    top: -100px; /* Start offscreen */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    /*height: 100px;*/
+    font-size: 85px;
+    text-align: center;
+    line-height: 100px;
+    font-weight: bold;
+    color: #2a301c;
+    border-radius: 8px;
+    opacity: 1;
+    transition: top 3s linear;
 }

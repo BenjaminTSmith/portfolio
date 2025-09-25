@@ -152,6 +152,7 @@ const f = 1 / gameboyAnimationPeriod;
 let gameboyAnimationTimer = 0
 let gameboySpinTimer = 0;
 let closestEndOfPeriod = 0;
+let nintendoLogoTimer = 0;
 function animate() {
     if (!running) return;
     requestAnimationFrame(animate);
@@ -229,14 +230,30 @@ function animate() {
         gameboyAnimationTimer += dt;
         if (gameboyAnimationTimer > 1) {
             gameboyState = GameboyState.zoomed;
+            renderer.domElement.style.display = 'none';
+            document.body.style.backgroundColor = '#81975b';
         }
         gameboy.position.x = lerp(gameboyPositionInital.x, gameboyPositionFinal.x, easeInOutQuart(gameboyAnimationTimer));
         gameboy.position.y = lerp(gameboyPositionInital.y, gameboyPositionFinal.y, easeInOutQuart(gameboyAnimationTimer));
         gameboy.position.z = lerp(gameboyPositionInital.z, gameboyPositionFinal.z, easeInOutQuart(gameboyAnimationTimer));
     } else if (gameboyState == GameboyState.zoomed) {
-        running = false;
-        renderer.domElement.style.display = 'none';
-        document.body.style.backgroundColor = '#81975b';
+        nintendoLogoTimer += dt / 5;
+        if (nintendoLogoTimer > 1) nintendoLogoTimer = 1;
+        const logo = document.getElementById("nintendo");
+        setTimeout(() => {
+            logo.style.top = "50%";   // move into center vertically
+            logo.style.transform = "translate(-50%, -50%)"; // keep centered
+        }, 500);
+
+        // After it’s in the middle, disappear
+        setTimeout(() => {
+            logo.style.display = "none";  // fade out
+        }, 4500);
+
+        // Optional: remove it from the DOM after fading
+        setTimeout(() => {
+            logo.remove();
+        }, 5000);
     }
 
     renderer.render(scene, camera);
