@@ -24,6 +24,7 @@ camera.position.setZ(30);
 const light = new THREE.AmbientLight(0x404040, 50);
 scene.add( light );
 
+const loading = document.getElementById("loading");
 const loader = new GLTFLoader();
 let gameboy = null;
 loader.load(
@@ -42,9 +43,12 @@ loader.load(
         gameboy.userData.forwardQuat = gameboy.quaternion.clone();
 
         scene.add(gameboy);
+
+        loading.style.display = "none";
     },
     (xhr) => {
         console.log(`Model ${(xhr.loaded / xhr.total) * 100}% loaded`);
+        loading.innerHTML = `Loading... ${(xhr.loaded / xhr.total) * 100}%`;
     },
     (error) => {
         console.error('An error occurred while loading the GLTF model:', error);
@@ -111,7 +115,7 @@ const GameboyState = {
 // gameboy state stuff for animation
 let gameboyState = GameboyState.spinning;
 let gameboyPositionInital = null;
-let gameboyPositionFinal = new THREE.Vector3(0, -5, 26);
+let gameboyPositionFinal = new THREE.Vector3(0, -5, 28);
 let gameboySpinRotationInitial = 0;
 window.addEventListener('click', () => {
     getClosestIntersection(camera, scene);
@@ -167,10 +171,10 @@ function animate() {
 
     renderer.clear();
 
-    if (gameboy !== null) {
+    /*if (gameboy !== null) {
         const element = document.getElementById("loading");
         element.style.display = "none";
-    }
+    }*/
 
     getClosestIntersection(camera, scene);
     const dt = clock.getDelta();
@@ -190,7 +194,6 @@ function animate() {
 
         const timeToRotateGameboy = 6;
         gameboy.rotateY(dt / timeToRotateGameboy * 2 * Math.PI);
-        console.log(gameboy.rotation.y);
 
         gameboyAnimationTimer += dt;
         if (gameboyAnimationTimer > gameboyAnimationPeriod) gameboyAnimationTimer = 0;
