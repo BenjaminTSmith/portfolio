@@ -48,7 +48,8 @@ loader.load(
     },
     (xhr) => {
         console.log(`Model ${(xhr.loaded / xhr.total) * 100}% loaded`);
-        loading.innerHTML = `Loading... ${(xhr.loaded / xhr.total) * 100}%`;
+        const percentage = (xhr.loaded / xhr.total) * 100;
+        loading.innerHTML = `Loading... ${percentage >= 100 ? 100 : percentage}%`;
     },
     (error) => {
         console.error('An error occurred while loading the GLTF model:', error);
