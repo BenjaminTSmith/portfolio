@@ -48,7 +48,7 @@ loader.load(
     },
     (xhr) => {
         console.log(`Model ${(xhr.loaded / xhr.total) * 100}% loaded`);
-        const percentage = (xhr.loaded / xhr.total) * 100;
+        const percentage = Math.floor((xhr.loaded / xhr.total) * 100);
         loading.innerHTML = `Loading... ${percentage >= 100 ? 100 : percentage}%`;
     },
     (error) => {
